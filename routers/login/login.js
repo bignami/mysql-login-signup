@@ -4,8 +4,13 @@ import crypto from 'crypto';
 const router = express.Router();
 
 router.get('/',(req, res) => {
-    res.render('./login/login')
-})
+
+    let session = req.session;
+    console.log(session);
+    res.render('./login/login', {
+        session: session
+    });
+});
 
 router.post('/', async(req, res) => {
     console.log(req.body);
@@ -22,7 +27,8 @@ router.post('/', async(req, res) => {
 
             const ddPassword = await crypto.pbkdf2Sync(userPassword, data[0].userKey, 10000, 64, 'sha512').toString('base64');
             if(data[0].userPassword === ddPassword) {
-                res.send(data[0].userName +"님 어서오세요");
+                req.session.userName = await data[0].userName;
+                res.redirect("/login");
             }
             else {
                 res.send("님 이메일이랑 비번 틀렸어요");
